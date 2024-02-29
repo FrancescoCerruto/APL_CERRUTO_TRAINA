@@ -1,0 +1,13 @@
+#ambienti virtuali python
+**/venv/
+
+#cartella pycharm
+**/.idea/
+
+#visual studio
+**/.vs
+**/obj/
+**/bin/
+*.sln
+*.user
+*.pyproj

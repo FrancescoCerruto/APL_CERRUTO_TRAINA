@@ -1,0 +1,255 @@
+version: "3.8"
+
+volumes:
+  user:
+  exam:
+  controller:
+  student:
+
+networks:
+  frontend:
+  backend:
+
+services:
+  # mysql database - table Professor and student - used by authenticationserver
+  userdb:
+    image: francescocerruto/apl_userdb:1.0
+    build:
+      context: Database/MySQL
+      dockerfile: Dockerfile
+    environment:
+      - MYSQL_ROOT_PASSWORD=apl_2024
+      - MYSQL_USER=apl_user
+      - MYSQL_PASSWORD=pass@word2024
+      - MYSQL_DATABASE=apl_data
+    ports:
+      - "3307:3306"
+    # who depends on this microservice start after container is marked as healthy
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 55
+    # persistent data
+    volumes:
+      - user:/var/lib/Initializer
+    restart: always
+    networks:
+      - backend
+
+  authenticationserver:
+    image: francescocerruto/apl_authenticationserver:1.0
+    build:
+      context: AuthenticationServer
+      dockerfile: Dockerfile
+    container_name: authenticationserver
+    depends_on:
+      userdb:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+    environment:
+      - DBHOST=userdb
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:80
+      - MYSQL_USER=apl_user
+      - MYSQL_PASSWORD=pass@word2024
+      - MYSQL_DATABASE=apl_data
+    restart: always
+    networks:
+      - backend
+
+  # redis database - student submit exam - used by studentcontroller and professorcontroller
+  controllerdb:
+    image: francescocerruto/apl_controllerdb:1.0
+    build:
+      context: Database/Redis
+      dockerfile: Dockerfile
+    ports:
+      - "6380:6379"
+    volumes:
+      - controller:/data
+    restart: always
+    networks:
+      - backend
+
+  studentcontroller:
+    image: francescocerruto/apl_studentcontroller:1.0
+    build:
+      context: StudentController
+      dockerfile: Dockerfile
+    container_name: studentcontroller
+    depends_on:
+      exammanager:
+        condition: service_started
+      filesharing:
+        condition: service_started
+      controllerdb:
+        condition: service_started
+    ports:
+      - "8082:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:80
+      - DBHOST=controllerdb
+    restart: always
+    networks:
+      - backend
+
+  professorcontroller:
+    image: francescocerruto/apl_professorcontroller:1.0
+    build:
+      context: ProfController
+      dockerfile: Dockerfile
+    container_name: professorcontroller
+    depends_on:
+      authenticationserver:
+        condition: service_started
+      exammanager:
+        condition: service_started
+      filesharing:
+        condition: service_started
+      controllerdb:
+        condition: service_started
+      metricscontroller:
+        condition: service_started
+    ports:
+      - "8083:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:80
+      - DBHOST=controllerdb
+    restart: always
+    networks:
+      - backend
+
+  # redis database - student exam (temporarily) - used by studentserver
+  studentdb:
+    image: francescocerruto/apl_studentdb:1.0
+    build:
+      context: Database/Redis
+      dockerfile: Dockerfile
+    ports:
+      - "6381:6379"
+    volumes:
+      - student:/data
+    restart: always
+    networks:
+      - backend
+
+  studentserver:
+    image: francescocerruto/apl_studentserver:1.0
+    build:
+      context: StudentServer
+      dockerfile: Dockerfile
+    container_name: studentserver
+    depends_on:
+      authenticationserver:
+        condition: service_started
+      studentcontroller:
+        condition: service_started
+      studentdb:
+        condition: service_started
+    ports:
+      - "5001:5000"
+    restart: always
+    networks:
+      - frontend
+      - backend
+    environment:
+      # print debug
+      - PYTHONUNBUFFERED=1
+      - REDIS_HOST=studentdb
+      - REDIS_PORT=6379
+
+  professorserver:
+    image: francescocerruto/apl_professorserver:1.0
+    build:
+      context: ProfessorServer
+      dockerfile: Dockerfile
+    container_name: professorserver
+    depends_on:
+      authenticationserver:
+        condition: service_started
+      exammanager:
+        condition: service_started
+      professorcontroller:
+        condition: service_started
+    ports:
+      - "5002:5000"
+    restart: always
+    networks:
+      - frontend
+      - backend
+    environment:
+      # print debug
+      - PYTHONUNBUFFERED=1
+
+  # mongo database - table Question, ExamParameters and StudentExam - used by exammanager
+  examdb:
+    image: francescocerruto/apl_examdb:1.0
+    build:
+      context: Database/Mongo
+      dockerfile: Dockerfile
+    environment:
+      - MONGO_DATABASE=apl_data
+    ports:
+      - "27018:27017"
+    # persistent data
+    volumes:
+      - exam:/data/db
+    restart: always
+    networks:
+      - backend
+
+  exammanager:
+    image: francescocerruto/apl_exammanager:1.0
+    build:
+      context: ExamManager
+      dockerfile: Dockerfile
+    container_name: exammanager
+    depends_on:
+      examdb:
+        condition: service_started
+    ports:
+      - "5003:5000"
+    restart: always
+    networks:
+      - backend
+    environment:
+      - MONGO_DB=apl_data
+      - MONGO_HOST=examdb
+      # print debug
+      - PYTHONUNBUFFERED=1
+
+  metricscontroller:
+    image: francescocerruto/apl_metricscontroller:1.0
+    build:
+      context: MetricsController
+      dockerfile: Dockerfile
+    container_name: metricscontroller
+    depends_on:
+      exammanager:
+        condition: service_started
+    ports:
+      - "5004:5000"
+    restart: always
+    networks:
+      - backend
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  filesharing:
+    image: francescocerruto/apl_filesharing:1.0
+    build:
+      context: FileSharing
+      dockerfile: Dockerfile
+    container_name: filesharing
+    ports:
+      - "8084:8080"
+    restart: always
+    networks:
+      - backend
+
+name: apl

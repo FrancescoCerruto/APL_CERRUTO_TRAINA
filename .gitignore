@@ -1,0 +1,16 @@
+#ambienti virtuali python
+**/venv/
+
+#compilazione python
+**/__pycache__/
+
+#cartella pycharm
+**/.idea/
+
+#visual studio
+**/.vs
+**/obj/
+**/bin/
+*.user
+*.pyproj
+*.http

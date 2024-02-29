@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Register Page</title>
+
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <div class="background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <ul class="nav_ul">
+      <li class="nav_li"></li>
+    </ul>
+
+    <form method="post">
+        <div class='text'>
+        <h3>Professor Register</h3>
+
+        <label for="text">Code</label>
+        <input type="text" placeholder="Code" name="code" id="code">
+
+        <label for="password">Password</label>
+        <input type="password" placeholder="Password" name="password" id="password">
+
+        <label for="subject">Subject</label>
+        <input type="text" placeholder="Subject" name="subject" id="subject">
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <button type="submit">Submit registration</button>
+
+        <button type="button" name="login" onclick="window.location.href = '{{ url_for('login') }}' ; ">Log In</button>
+        </div>
+    </form>
+</body>
+</html>
+

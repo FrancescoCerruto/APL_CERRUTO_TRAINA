@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Metrics</title>
+
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <ul class="nav_ul">
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('logout') }}' ; ">Logout</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('exam_parameters') }}' ; ">Exam Parameters</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('add_questions') }}' ; ">Add Questions</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('add_student') }}' ; ">Add Student</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('restore') }}' ; ">Restore</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('metrics') }}' ; ">Metrics</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('download') }}' ; ">Download</a></li>
+    </ul>
+
+    <div class="plot_container">
+        <img src="{{ url_for('static',filename=plot1) }}" alt="Chart">
+        <img src="{{ url_for('static',filename=plot2) }}" alt="Chart">
+        <img src="{{ url_for('static',filename=plot3) }}" alt="Chart" onerror='this.style.display = "none"'>
+    </div>
+
+    <div class="plot_container">
+        <img src="{{ url_for('static',filename=plot4) }}" alt="Chart">
+        <img src="{{ url_for('static',filename=plot5) }}" alt="Chart">
+    </div>
+</body>
+</html>

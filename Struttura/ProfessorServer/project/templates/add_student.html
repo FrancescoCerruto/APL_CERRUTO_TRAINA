@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Student</title>
+
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <div class="background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <ul class="nav_ul">
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('logout') }}' ; ">Logout</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('exam_parameters') }}' ; ">Exam Parameters</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('add_questions') }}' ; ">Add Questions</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('add_student') }}' ; ">Add Student</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('restore') }}' ; ">Restore</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('metrics') }}' ; ">Metrics</a></li>
+        <li class="nav_li"><a onclick="window.location.href = '{{ url_for('download') }}' ; ">Download</a></li>
+    </ul>
+
+<form method="post" enctype="multipart/form-data">
+    <div class='text'>
+        <label for="studentslist">Insert students file:<br></label>
+        <input type="file" id="studentslist" name="studentslist"/>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <div class="buttoncontainer">
+        <button type="submit">Submit file</button>
+        </div>
+
+    </div>
+</form>
+
+</body>
+</html>
