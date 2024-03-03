@@ -15,13 +15,13 @@
 #### Newtonsoft.Json (per consentire la gestione dei JSON)
 #### ServiceStack.Redis (per consentire l'interfacciamo con i database Redis)
 #### MySqlConnector (per consentire l'interfacciamento con i database MySQL)
-#### Dapper versione (per consentire l'utilizzo dei comandi MySQL)
+#### Dapper (per consentire l'utilizzo dei comandi MySQL)
 
 ### Go
 #### varie librerie di I/O (bufio, fmt, io)
-#### encoding/json (consersione string a JSON e viceversa)
+#### encoding/json (conversione string a JSON e viceversa)
 #### net/http (client e server http)
-#### path/filepath (utility di formattazione path
+#### path/filepath (utility di formattazione path)
 
 ## Istruzioni per il build del docker compose
 **Richiede l'installazione di docker desktop**
@@ -44,7 +44,7 @@ Per far funzionare correttamente l'applicazione, bisogna innanzitutto configurar
 
 2) effettuare register e successivamente login 
 
-**! per utilizzare i file predisposti inserire nel campo **subject** va inserito matematica, italiano, inglese oppure spagnolo e nel campo **code** 1, 2, 3 o 4 (rispettivamente)**
+**! per utilizzare i file predisposti inserire nel campo **subject** matematica, italiano oppure inglesee e nel campo **code** 1, 2 o 3 (rispettivamente)**
 
 3) caricare i file di studenti (pagina **Add Student**) e domande (pagina **Add Questions**)
 
@@ -59,7 +59,7 @@ Una volta configurato il sistema lo studente è abilitato all'utilizzo della pia
 
 2) effettuare il login
 
-**! per poter continuare inserire nel campo **Student Code** un valore nel range [1, 1000] se si sceglie come subject matematica, italiano o inglese (inserire nel campo **Professor code** 1, 2 o 3 rispettivamente) oppure nel range [1001, 2000] se si sceglie come subject spagnolo (inserire nel campo **Professor code** 4)**
+**! per poter continuare inserire nel campo **Student Code** un valore nel range [1, 1000] se si sceglie come subject matematica, italiano o inglese (inserire nel campo **Professor code** 1, 2 o 3 rispettivamente)**
 
 3) una volta autenticato viene automaticamente generato il compito e si può procedere con la sottomissione (una domanda per volta)
 
@@ -75,12 +75,16 @@ In qualsiasi momento il professore può recuperare le metrice (pagina **Metrics*
 ### Reset del sistema
 In qualsiasi momento il professore può decidere di resettare il sistema (pagina **Restore**). Questa azione comporta l'eliminazione di 
 
-1) domande,
+1) domande
 
 2) studenti
 
 3) file
 
 4) metriche
+
+5) compiti
+
+6) parametri
 
 **! il professorcontroller si occuperà di bloccare l'azione nel caso in cui ci siano ancora compiti non consegnati così da consentire la futura correzione**
