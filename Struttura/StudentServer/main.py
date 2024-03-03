@@ -3,7 +3,8 @@ from functools import wraps
 from project import create_app
 from flask import render_template, redirect, request, flash, session, g
 from redis import Redis
-import os, json
+import os
+import json
 
 app = create_app()
 
@@ -35,7 +36,7 @@ def check_user_logged(f):
 
 @app.route('/')
 def home():
-    return redirect ('/login')
+    return redirect('/login')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -59,7 +60,7 @@ def login():
 
         if response.status_code == 200:
             # set cookie
-            user_session = {'student_code': student_code, 'professor_code': professor_code, 'subject': subject}
+            user_session = {'student_code': student_code, 'professor_code': professor_code, 'subject': subject, 'ended': False}
             session['student_data'] = user_session
             return redirect('/start_exam')
         if response.status_code == 404:
@@ -106,7 +107,7 @@ def start_exam(student_code, professor_code, subject):
 
         # prof not upload questions or parameters
         if response.status_code != 200:
-            flash(response.content.decode)
+            flash(response.content.decode())
             return render_template('start_exam.html')
 
         # exam created --> store in redis
@@ -171,11 +172,12 @@ def execute_exam(student_code, professor_code, subject):
             }
             response = requests.post("http://studentcontroller:80/api/Student/end_exam", data=data_post)
 
-            for row in response.content.decode()[1 : -1].split(","):
+            for row in response.content.decode()[1:-1].split(","):
                 flash(row)
 
             # delete local exam
             get_redis().delete(student_code)
+            session['student_data']['ended'] = True
             return redirect('/end')
 
         return redirect('/execute')
@@ -187,8 +189,8 @@ def execute_exam(student_code, professor_code, subject):
 @app.route('/end')
 @check_user_logged
 def end_exam(student_code, professor_code, subject):
-    if get_redis().get(student_code) is None:
-        return redirect('/start_exam')
+    if not session.get('student_data')['ended']:
+        return redirect('/login')
 
     # call student controller - retrieve result
     data_post = {
@@ -198,7 +200,7 @@ def end_exam(student_code, professor_code, subject):
     }
     response = requests.post("http://studentcontroller:80/api/Student/retrieve_result", data=data_post)
 
-    return render_template('end_exam.html', result = response.content.decode())
+    return render_template('end_exam.html', result=response.content.decode())
 
 
 @app.route('/logout')
