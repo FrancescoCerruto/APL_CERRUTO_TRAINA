@@ -102,10 +102,14 @@ def start_exam(student_code, professor_code, subject):
 
         # student already created an exam
         if response.status_code == 400:
-            # student already created an exam --> check if exam isn't already submitted
+            # student already created and submitted an exam
+            # update cookie
+            user_session = {'student_code': student_code, 'professor_code': professor_code, 'subject': subject,
+                            'ended': True}
+            session['student_data'] = user_session
             return redirect('/end')
 
-        # prof not upload questions or parameters
+        # prof not upload questions or parameters (response from exam manager 500 or 404)
         if response.status_code != 200:
             flash(response.content.decode())
             return render_template('start_exam.html')
@@ -177,7 +181,9 @@ def execute_exam(student_code, professor_code, subject):
 
             # delete local exam
             get_redis().delete(student_code)
-            session['student_data']['ended'] = True
+            # update cookie
+            user_session = {'student_code': student_code, 'professor_code': professor_code, 'subject': subject, 'ended': True}
+            session['student_data'] = user_session
             return redirect('/end')
 
         return redirect('/execute')
@@ -190,7 +196,7 @@ def execute_exam(student_code, professor_code, subject):
 @check_user_logged
 def end_exam(student_code, professor_code, subject):
     if not session.get('student_data')['ended']:
-        return redirect('/login')
+        return redirect('/start_exam')
 
     # call student controller - retrieve result
     data_post = {

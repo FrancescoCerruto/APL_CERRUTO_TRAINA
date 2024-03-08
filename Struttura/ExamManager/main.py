@@ -72,7 +72,7 @@ def create_exam():
 
     response_db = creation_exam(student_code, professor_code, subject)
     if response_db == -1:
-        return "Empty dataset to create exam", 400
+        return "Empty dataset to create exam", 404
     if response_db == -2:
         return "Error creation", 500
     return response_db, 200
